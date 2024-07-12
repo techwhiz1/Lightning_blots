@@ -1,0 +1,89 @@
+name: "Docs check"
+# https://github.com/marketplace/actions/sphinx-build
+
+on:  # Trigger the workflow on push or pull request, but only for the master branch
+  push:
+    branches: [master]
+  pull_request: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.head_ref }}
+  cancel-in-progress: ${{ ! (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release/')) }}
+
+env:
+  FREEZE_REQUIREMENTS: 1
+  TORCH_URL: "https://download.pytorch.org/whl/cpu/torch_stable.html"
+  TRANSFORMERS_CACHE: _hf_cache
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  test-docs:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ hashFiles('requirements/*.txt') }}
+          restore-keys: pip-
+
+      - name: Install package & dependencies
+        run: |
+          pip install "pip==22.2.1"  # todo: drop after resolving extras
+          pip install -e . -r requirements/devel.txt -r docs/requirements.txt -f $TORCH_URL
+          pip list
+
+      - name: Test Documentation
+        working-directory: docs/
+        env:
+          SPHINX_MOCK_REQUIREMENTS: 0
+        run: |
+          make doctest
+          make coverage
+
+
+  make-docs:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ hashFiles('requirements/*.txt') }}
+          restore-keys: pip-
+
+      - name: Install package & dependencies
+        run: |
+          # install Texlive, see https://linuxconfig.org/how-to-install-latex-on-ubuntu-20-04-focal-fossa-linux
+          sudo apt-get update && sudo apt-get install -y texlive-latex-extra dvipng texlive-pictures
+          pip install "pip==22.2.1"  # todo: drop after resolving extras
+          pip install -e . -r docs/requirements.txt -f $TORCH_URL
+          pip list
+
+      - name: Make Documentation
+        working-directory: docs/
+        run: |
+          make clean
+          make html --debug --jobs 2 SPHINXOPTS="-W"
+
+      - name: Upload built docs
+        uses: actions/upload-artifact@v3
+        with:
+          name: docs-results-${{ github.sha }}
+          path: docs/build/html/
+        # Use always() to always run this step to publish test results when there are test failures
+        if: success()

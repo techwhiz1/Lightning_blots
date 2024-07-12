@@ -1,0 +1,227 @@
+[metadata]
+license_file = "LICENSE"
+description-file = "README.md"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+
+
+[tool.check-manifest]
+ignore = [
+    "*.yml",
+    ".github",
+    ".github/*"
+]
+
+
+[tool.pytest.ini_options]
+norecursedirs = [
+    ".git",
+    ".github",
+    "dist",
+    "build",
+    "docs",
+]
+addopts = [
+    "--strict-markers",
+    "--doctest-modules",
+    "--color=yes",
+    "--disable-pytest-warnings",
+]
+#filterwarnings = [
+#    "error::FutureWarning",
+#]
+xfail_strict = false  # todo
+junit_duration_report = "call"
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "pass",
+]
+
+[tool.coverage.run]
+parallel = true
+relative_files = true
+
+
+[tool.black]
+# https://github.com/psf/black
+line-length = 120
+exclude = "(.eggs|.git|.hg|.mypy_cache|.venv|_build|buck-out|build|dist)"
+
+[tool.docformatter]
+recursive = true
+wrap-summaries = 120
+wrap-descriptions = 120
+blank = true
+
+
+[tool.ruff]
+line-length = 120
+# Enable Pyflakes `E` and `F` codes by default.
+select = [
+    "E", "W",  # see: https://pypi.org/project/pycodestyle
+    "F",  # see: https://pypi.org/project/pyflakes
+    "I",  # see: isort
+    "N",  # see: https://pypi.org/project/pep8-naming
+#    "D",  # see: https://pypi.org/project/pydocstyle
+]
+ extend-select = [
+     "C4",  # see: https://pypi.org/project/flake8-comprehensions
+     "PT",  # see: https://pypi.org/project/flake8-pytest-style
+     "RET",  # see: https://pypi.org/project/flake8-return
+     "SIM",  # see: https://pypi.org/project/flake8-simplify
+     "YTT",  # see: https://pypi.org/project/flake8-2020
+     "S",  # see: https://pypi.org/project/flake8-bandit
+     "T10",  # see: https://pypi.org/project/flake8-debugger/
+#     "ANN",  # see: https://pypi.org/project/flake8-annotations
+ ]
+ignore = [
+    "E731",  # Do not assign a lambda expression, use a def
+]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".eggs",
+    ".git",
+    ".mypy_cache",
+    ".ruff_cache",
+    "__pypackages__",
+    "_build",
+    "build",
+    "dist",
+    "docs"
+]
+ignore-init-module-imports = true
+unfixable = ["F401"]
+
+[tool.ruff.per-file-ignores]
+"src/**" = [
+    "S101",  # todo: Use of `assert` detected
+    "S324",  # todo: Probable use of insecure hash functions in `hashlib`: `md5`
+
+]
+"tests/**" = [
+    "S101",  # Use of `assert` detected
+]
+
+[tool.mypy]
+files = ["src/pl_bolts"]
+disallow_untyped_defs = "True"
+ignore_missing_imports = "True"
+install_types = "True"
+non_interactive = "True"
+show_error_codes = "True"
+warn_redundant_casts = "True"
+warn_unused_configs = "True"
+warn_unused_ignores = "True"
+allow_redefinition = "True"
+# disable this rule as the Trainer attributes are defined in the connectors, not in its __init__
+disable_error_code = "attr-defined"
+# style choices
+warn_no_return = "False"
+
+# TODO: Fix typing for these modules
+[[tool.mypy.overrides]]
+module = [
+    "pl_bolts.callbacks.byol_updates",
+    "pl_bolts.callbacks.data_monitor",
+    "pl_bolts.callbacks.knn_online",
+    "pl_bolts.callbacks.ssl_online",
+    "pl_bolts.callbacks.variational",
+    "pl_bolts.callbacks.vision.confused_logit",
+    "pl_bolts.callbacks.vision.image_generation",
+    "pl_bolts.callbacks.vision.sr_image_logger",
+    "pl_bolts.datamodules.experience_source",
+    "pl_bolts.datamodules.sklearn_datamodule",
+    "pl_bolts.datamodules.ssl_imagenet_datamodule",
+    "pl_bolts.datamodules.vision_datamodule",
+    "pl_bolts.datamodules.vocdetection_datamodule",
+    "pl_bolts.datasets.base_dataset",
+    "pl_bolts.datasets.cifar10_dataset",
+    "pl_bolts.datasets.concat_dataset",
+    "pl_bolts.datasets.dummy_dataset",
+    "pl_bolts.datasets.imagenet_dataset",
+    "pl_bolts.datasets.kitti_dataset",
+    "pl_bolts.datasets.sr_celeba_dataset",
+    "pl_bolts.datasets.sr_mnist_dataset",
+    "pl_bolts.datasets.sr_stl10_dataset",
+    "pl_bolts.datasets.ssl_amdim_datasets",
+    "pl_bolts.datasets.utils",
+    "pl_bolts.losses.rl",
+    "pl_bolts.losses.self_supervised_learning",
+    "pl_bolts.metrics.aggregation",
+    "pl_bolts.models.autoencoders.basic_ae.basic_ae_module",
+    "pl_bolts.models.autoencoders.basic_vae.basic_vae_module",
+    "pl_bolts.models.autoencoders.components",
+    "pl_bolts.models.detection.components.torchvision_backbones",
+    "pl_bolts.models.detection.faster_rcnn.backbones",
+    "pl_bolts.models.detection.faster_rcnn.faster_rcnn_module",
+    "pl_bolts.models.detection.retinanet.backbones",
+    "pl_bolts.models.detection.retinanet.retinanet_module",
+    "pl_bolts.models.gans.basic.basic_gan_module",
+    "pl_bolts.models.gans.basic.components",
+    "pl_bolts.models.gans.dcgan.dcgan_module",
+    "pl_bolts.models.gans.pix2pix.components",
+    "pl_bolts.models.gans.pix2pix.pix2pix_module",
+    "pl_bolts.models.gans.srgan.components",
+    "pl_bolts.models.gans.srgan.srgan_module",
+    "pl_bolts.models.gans.srgan.srresnet_module",
+    "pl_bolts.models.mnist_module",
+    "pl_bolts.models.regression.linear_regression",
+    "pl_bolts.models.regression.logistic_regression",
+    "pl_bolts.models.rl.advantage_actor_critic_model",
+    "pl_bolts.models.rl.common.agents",
+    "pl_bolts.models.rl.common.cli",
+    "pl_bolts.models.rl.common.distributions",
+    "pl_bolts.models.rl.common.gym_wrappers",
+    "pl_bolts.models.rl.common.memory",
+    "pl_bolts.models.rl.common.networks",
+    "pl_bolts.models.rl.double_dqn_model",
+    "pl_bolts.models.rl.dqn_model",
+    "pl_bolts.models.rl.dueling_dqn_model",
+    "pl_bolts.models.rl.noisy_dqn_model",
+    "pl_bolts.models.rl.per_dqn_model",
+    "pl_bolts.models.rl.ppo_model",
+    "pl_bolts.models.rl.reinforce_model",
+    "pl_bolts.models.rl.sac_model",
+    "pl_bolts.models.rl.vanilla_policy_gradient_model",
+    "pl_bolts.models.self_supervised.amdim.amdim_module",
+    "pl_bolts.models.self_supervised.amdim.datasets",
+    "pl_bolts.models.self_supervised.amdim.networks",
+    "pl_bolts.models.self_supervised.amdim.transforms",
+    "pl_bolts.models.self_supervised.byol.byol_module",
+    "pl_bolts.models.self_supervised.byol.models",
+    "pl_bolts.models.self_supervised.cpc.cpc_finetuner",
+    "pl_bolts.models.self_supervised.cpc.cpc_module",
+    "pl_bolts.models.self_supervised.cpc.networks",
+    "pl_bolts.models.self_supervised.cpc.transforms",
+    "pl_bolts.models.self_supervised.evaluator",
+    "pl_bolts.models.self_supervised.moco.callbacks",
+    "pl_bolts.models.self_supervised.moco.transforms",
+    "pl_bolts.models.self_supervised.resnets",
+    "pl_bolts.models.self_supervised.simclr.simclr_finetuner",
+    "pl_bolts.models.self_supervised.simclr.simclr_module",
+    "pl_bolts.models.self_supervised.simclr.transforms",
+    "pl_bolts.models.self_supervised.simsiam.simsiam_module",
+    "pl_bolts.models.self_supervised.ssl_finetuner",
+    "pl_bolts.models.self_supervised.swav.swav_finetuner",
+    "pl_bolts.models.self_supervised.swav.swav_module",
+    "pl_bolts.models.self_supervised.swav.swav_resnet",
+    "pl_bolts.models.self_supervised.swav.transforms",
+    "pl_bolts.models.vision.image_gpt.gpt2",
+    "pl_bolts.models.vision.image_gpt.igpt_module",
+    "pl_bolts.models.vision.pixel_cnn",
+    "pl_bolts.models.vision.segmentation",
+    "pl_bolts.models.vision.unet",
+    "pl_bolts.optimizers.lars",
+    "pl_bolts.optimizers.lr_scheduler",
+    "pl_bolts.transforms.dataset_normalizations",
+    "pl_bolts.transforms.self_supervised.moco_transforms",
+    "pl_bolts.transforms.self_supervised.simclr_transforms",
+    "pl_bolts.transforms.self_supervised.ssl_transforms",
+    "pl_bolts.transforms.self_supervised.swav_transforms",
+    "pl_bolts.utils.arguments",
+    "pl_bolts.utils.stability",
+]
+ignore_errors = "True"
